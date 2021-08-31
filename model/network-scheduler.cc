@@ -154,6 +154,11 @@ NetworkScheduler::DoSend(Ptr<Packet> data, LoraDeviceAddress deviceAddress, int 
     {
       // Find all avalible gateways to send broadcast
       std::list<Address> gwAddresses = m_status->GetAvalibleGatewaysForBroadcast ();
+      if (gwAddresses.size() == 0) 
+      {
+        NS_LOG_INFO ("No avalible gateways for broadcast!");
+        return;
+      }
 
       // Create a broadcast frame
       Ptr<Packet> packet = m_status->CreateBroadcastPacket (data);
