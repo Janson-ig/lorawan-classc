@@ -46,6 +46,7 @@ int main (int argc, char *argv[])
 
   LogComponentEnable ("ClassCEndDeviceExample", LOG_LEVEL_ALL);
   LogComponentEnable ("NetworkServer", LOG_LEVEL_ALL);
+  LogComponentEnable ("NetworkScheduler", LOG_LEVEL_ALL);
   //LogComponentEnable ("GatewayLorawanMac", LOG_LEVEL_ALL);
   // LogComponentEnable("LoraFrameHeader", LOG_LEVEL_ALL);
   // LogComponentEnable("LorawanMacHeader", LOG_LEVEL_ALL);
@@ -111,7 +112,7 @@ int main (int argc, char *argv[])
   /////////////
 
   NodeContainer endDevices;
-  endDevices.Create (1);
+  endDevices.Create (2);
   mobilityEd.Install (endDevices);
 
   // Create a LoraDeviceAddressGenerator
@@ -127,15 +128,17 @@ int main (int argc, char *argv[])
   helper.Install (phyHelper, macHelper, endDevices);
 
   // Set message type (Default is unconfirmed)
-  Ptr<LorawanMac> edMac1 = endDevices.Get (0)->GetDevice (0)->GetObject<LoraNetDevice> ()->GetMac ();
-  Ptr<ClassCEndDeviceLorawanMac> edLorawanMac1 = edMac1->GetObject<ClassCEndDeviceLorawanMac> ();
-  //edLorawanMac1->SetMType (LorawanMacHeader::CONFIRMED_DATA_UP);  // not support on class-c end-device
+  Ptr<LorawanMac> edMac0 = endDevices.Get (0)->GetDevice (0)->GetObject<LoraNetDevice> ()->GetMac ();
+  Ptr<ClassCEndDeviceLorawanMac> edLorawanMac0 = edMac0->GetObject<ClassCEndDeviceLorawanMac> ();
+  //edLorawanMac0->SetMType (LorawanMacHeader::CONFIRMED_DATA_UP);  // not support on class-c end-device
 
 
   // Install applications in EDs
   OneShotSenderHelper oneShotHelper = OneShotSenderHelper ();
   oneShotHelper.SetSendTime (Seconds (4));
-  oneShotHelper.Install (endDevices.Get (0));
+  oneShotHelper.Install (endDevices.Get(0));
+  oneShotHelper.SetSendTime (Seconds (10));
+  oneShotHelper.Install (endDevices.Get(1));
 
   ////////////////
   // Create GWs //
@@ -171,8 +174,10 @@ int main (int argc, char *argv[])
   ForwarderHelper forwarderHelper;
   forwarderHelper.Install (gateways);
 
-  // Try to send a packet to the end-device
-  Simulator::Schedule(Seconds (20.0), &SendPacket, ns, Create<Packet>(10), edLorawanMac1->GetDeviceAddress());
+  // Try to send a unicast packet to the end-device
+  Simulator::Schedule(Seconds (20.0), &SendPacket, ns, Create<Packet>(10), edLorawanMac0->GetDeviceAddress());
+  // Try to send a broadcast packet to the end-devices
+  Simulator::Schedule(Seconds (300.0), &SendPacket, ns, Create<Packet>(10), LoraDeviceAddress(0xFF, 0xFFFFFFFF));
 
   // Start simulation
   Simulator::Stop (Seconds (800));
