@@ -400,11 +400,6 @@ private:
   int m_interferenceCalls = 0;
   int m_receivedPacketCalls = 0;
   int m_maxOccupiedReceptionPaths = 0;
-
-  double frequency1 = 868.1;
-  double frequency2 = 868.3;
-  double frequency3 = 868.5;
-  double frequency4 = 868.7;
 };
 
 // Add some help text to this case to describe what it is intended to test
@@ -902,7 +897,7 @@ TimeOnAirTest::DoRun (void)
   txParams.bandwidthHz = 125000;
   txParams.nPreamble = 8;
   txParams.crcEnabled = 1;
-  txParams.lowDataRateOptimizationEnabled = 0;
+  txParams.lowDataRateOptimizationEnabled = false;
 
   duration = LoraPhy::GetOnAirTime (packet, txParams);
   NS_TEST_EXPECT_MSG_EQ_TOL (duration.GetSeconds (), 0.041216, 0.0001, "Unexpected duration");
